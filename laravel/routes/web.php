@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController as Auth;
 use App\Http\Controllers\ProfileController as Profile;
+
+use App\Http\Controllers\Admin\UserController as AdminUser;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,10 +22,27 @@ Route::get('/', function () {
 });
 
 // Login
-Route::get('/login', [Auth::class, 'login']);
-Route::get('/loginCheck', [Auth::class, 'check']);
-Route::post('/login', [Auth::class, 'loginSubmit']);
+Route::prefix('auth')->group(function() {
+    Route::name('auth.')->controller(Auth::class)->group(function() {
+        Route::get('/login', 'login')->name('login');// auth.login
+        Route::get('/loginCheck', 'check')->name('check');
+        Route::post('/login', 'loginSubmit')->name('create');
+
+        // Register
+        Route::get('/register', 'registerShow')->name('register.show');
+        Route::post('/register', 'registerSubmit')->name('register.create');
+    });
+});
+Route::redirect('/login', '/auth/login');
 
 // Profile
 Route::get('/profile', [Profile::class, 'index']);
+
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard', ['page' => 'dashboard']);
+    })->name('admin.dashboard');
+    // User Page
+    Route::get('/users', [AdminUser::class, 'index'])->name('admin.users.list');
+});
 
